@@ -9,14 +9,15 @@ const debounceTimers = new Map();
 
 // Функция для обработки событий
 const handleFileChange = (filename) => {
-    console.log('filename',filename);
-    console.log(path.extname(filename));
-    if (filename && path.extname(filename) === '.drawio') {
     
+    if (filename && path.extname(filename) === '.drawio') {
+        console.log('---- Action ',count,  '----');
+        count++;
+        console.log(path.extname(filename));
         console.log(`File changed: ${filename}`);
     }
 };
-
+let count = 0;
 // Настройка наблюдателя
 fs.watch(watchDirectory, (eventType, filename) => {
     if (!filename) return;
@@ -27,7 +28,7 @@ fs.watch(watchDirectory, (eventType, filename) => {
     }
     
     const timer = setTimeout(() => {
-        console.log('eventType - ',eventType);
+        //console.log('eventType - ',eventType);
         debounceTimers.delete(filename);
         handleFileChange(filename);
     }, 100); // Задержка в 100 мс
