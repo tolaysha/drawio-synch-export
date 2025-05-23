@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { exec } = require('child_process');
 
 // Директория для отслеживания (папка рядом с main.js)
@@ -8,8 +9,22 @@ const watchDirectory = path.join(__dirname, 'data-for-example'); // Замени
 // Хранилище для таймеров дебаунса
 const debounceTimers = new Map();
 
-// Путь к CLI Draw.io (замените на ваш путь)
-const drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
+// Определение пути к CLI Draw.io в зависимости от операционной системы
+let drawioCliPath;
+switch (os.platform()) {
+    case 'win32': // Windows
+        drawioCliPath = 'C:\\Program Files\\draw.io\\draw.io.exe'; // Замените на реальный путь, если он отличается
+        break;
+    case 'darwin': // macOS
+        drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
+        break;
+    case 'linux': // Linux
+        drawioCliPath = '/usr/bin/drawio'; // Замените на реальный путь, если он отличается
+        break;
+    default:
+        console.error('Unsupported operating system');
+        process.exit(1);
+}
 
 // Функция для преобразования .drawio в .svg
 const convertDrawioToSvg = (drawioFilePath) => {
