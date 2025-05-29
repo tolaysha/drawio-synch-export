@@ -1,0 +1,12 @@
+{
+  "name": "drawio-synch-export",
+  "version": "1.0.0",
+  "description": "Soft for automatic saving of the scheme in the format 'svg', 'png', 'pdf', 'jpeg', when developing schemes in Draw.io",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
