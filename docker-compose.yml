@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  drawio:
+    image: drawio-synch-export
+    volumes:
+      - .:/app
+      - ./data-for-example:/app/data-for-example
+    stdin_open: true
+    tty: true
+    command: npm start

@@ -86,6 +86,13 @@ const convertDrawioToFormat = (drawioFilePath) => {
 
 // Функция для обработки событий
 const handleFileChange = (filename) => {
+    // Игнорируем временные файлы, начинающиеся с "."
+    if (filename.startsWith('.')) {
+        //console.log(`Ignored temporary file: ${filename}`);
+        return;
+    }
+
+    // Обрабатываем только файлы с расширением .drawio
     if (filename && path.extname(filename) === '.drawio') {
         console.log(`File changed: ${filename}`);
 
@@ -106,17 +113,17 @@ fs.watch(watchDirectory, (eventType, filename) => {
         return;
     }
 
-    console.log(`Event detected: ${eventType} for file: ${filename}`);
+    //console.log(`Event detected: ${eventType} for file: ${filename}`);
 
     // Дебаунс: предотвращаем множественные срабатывания
     if (debounceTimers.has(filename)) {
         clearTimeout(debounceTimers.get(filename));
-        console.log(`Debounced event for file: ${filename}`);
+        //console.log(`Debounced event for file: ${filename}`);
     }
 
     const timer = setTimeout(() => {
         debounceTimers.delete(filename);
-        console.log(`Processing file change: ${filename}`);
+        //console.log(`Processing file change: ${filename}`);
         handleFileChange(filename);
     }, 100); // Задержка в 100 мс
 

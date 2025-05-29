@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js ./data-for-example svg"
+    "start": "nodemon main.js ./data-for-example svg"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +14,13 @@
     "WATCH_DIRECTORY": "/app/data-for-example",
     "OUTPUT_FORMAT": "svg"
   },
-  "cmd": ["node", "main.js", "$WATCH_DIRECTORY", "$OUTPUT_FORMAT"]
+  "cmd": [
+    "node",
+    "main.js",
+    "$WATCH_DIRECTORY",
+    "$OUTPUT_FORMAT"
+  ],
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
