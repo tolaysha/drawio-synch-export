@@ -1,3 +1,4 @@
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
@@ -19,8 +20,41 @@ if (!supportedFormats.includes(outputFormat)) {
 // Хранилище для таймеров дебаунса
 const debounceTimers = new Map();
 
-// Путь к CLI Draw.io (замените на ваш путь)
-const drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
+// Определение пути к CLI Draw.io
+let drawioCliPath;
+
+const platform = os.platform(); // Определяем платформу (win32, darwin, linux)
+if (platform === 'darwin') {
+    // macOS
+    drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
+    if (fs.existsSync(drawioCliPath)) {
+        console.log('Using Draw.io CLI installed on macOS.');
+    } else {
+        console.error('Error: Draw.io CLI not found on macOS. Please install it.');
+        process.exit(1);
+    }
+} else if (platform === 'linux') {
+    // Linux
+    drawioCliPath = '/usr/bin/drawio';
+    if (fs.existsSync(drawioCliPath)) {
+        console.log('Using Draw.io CLI installed on Linux.');
+    } else {
+        console.error('Error: Draw.io CLI not found on Linux. Please install it.');
+        process.exit(1);
+    }
+} else if (platform === 'win32') {
+    // Windows
+    drawioCliPath = path.join('C:', 'Program Files', 'draw.io', 'draw.io.exe');
+    if (fs.existsSync(drawioCliPath)) {
+        console.log('Using Draw.io CLI installed on Windows.');
+    } else {
+        console.error('Error: Draw.io CLI not found on Windows. Please install it.');
+        process.exit(1);
+    }
+} else {
+    console.error(`Error: Unsupported platform "${platform}".`);
+    process.exit(1);
+}
 
 // Функция для преобразования .drawio в указанный формат
 const convertDrawioToFormat = (drawioFilePath) => {
@@ -28,6 +62,10 @@ const convertDrawioToFormat = (drawioFilePath) => {
         path.dirname(drawioFilePath),
         `${path.basename(drawioFilePath, '.drawio')}.${outputFormat}`
     );
+
+    console.log(`Starting conversion for file: ${drawioFilePath}`);
+    console.log(`Output file will be: ${outputFilePath}`);
+    console.log(`Executing command: "${drawioCliPath}" --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`);
 
     // Команда для экспорта
     const command = `"${drawioCliPath}" --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`;
@@ -41,7 +79,8 @@ const convertDrawioToFormat = (drawioFilePath) => {
             console.error(`stderr: ${stderr}`);
             return;
         }
-        console.log(`File converted to ${outputFormat}: ${outputFilePath}`);
+        console.log(`File converted successfully to ${outputFormat}: ${outputFilePath}`);
+        console.log(`stdout: ${stdout}`);
     });
 };
 
@@ -53,22 +92,31 @@ const handleFileChange = (filename) => {
         // Путь к измененному .drawio файлу
         const drawioFilePath = path.join(watchDirectory, filename);
 
-        // Конвертируем .drawio в указанный формат
+        console.log(`Detected .drawio file at: ${drawioFilePath}`);
         convertDrawioToFormat(drawioFilePath);
+    } else {
+        console.log(`Ignored file change: ${filename}`);
     }
 };
 
 // Настройка наблюдателя
 fs.watch(watchDirectory, (eventType, filename) => {
-    if (!filename) return;
+    if (!filename) {
+        console.log(`Filename not provided for event type: ${eventType}`);
+        return;
+    }
+
+    console.log(`Event detected: ${eventType} for file: ${filename}`);
 
     // Дебаунс: предотвращаем множественные срабатывания
     if (debounceTimers.has(filename)) {
         clearTimeout(debounceTimers.get(filename));
+        console.log(`Debounced event for file: ${filename}`);
     }
 
     const timer = setTimeout(() => {
         debounceTimers.delete(filename);
+        console.log(`Processing file change: ${filename}`);
         handleFileChange(filename);
     }, 100); // Задержка в 100 мс
 

@@ -13,10 +13,11 @@ COPY data-for-example ./data-for-example
 RUN npm install
 
 # Устанавливаем Draw.io CLI (для Linux)
+# Устанавливаем Draw.io CLI (ARM64)
 RUN apt-get update && apt-get install -y wget && \
-    wget https://github.com/jgraph/drawio-desktop/releases/download/v20.8.16/drawio-x86_64-20.8.16.AppImage && \
-    chmod +x drawio-x86_64-20.8.16.AppImage && \
-    mv drawio-x86_64-20.8.16.AppImage /usr/bin/drawio
+    wget https://github.com/jgraph/drawio-desktop/releases/download/v27.0.9/drawio-arm64-27.0.9.AppImage && \
+    chmod +x drawio-arm64-27.0.9.AppImage && \
+    mv drawio-arm64-27.0.9.AppImage /usr/bin/drawio
 
 # Указываем путь к Draw.io CLI
 ENV DRAWIO_CLI_PATH=/usr/bin/drawio

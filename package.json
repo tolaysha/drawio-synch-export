@@ -4,9 +4,15 @@
   "description": "Soft for automatic saving of the scheme in the format 'svg', 'png', 'pdf', 'jpeg', when developing schemes in Draw.io",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js ./data-for-example svg"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "env": {
+    "WATCH_DIRECTORY": "/app/data-for-example",
+    "OUTPUT_FORMAT": "svg"
+  },
+  "cmd": ["node", "main.js", "$WATCH_DIRECTORY", "$OUTPUT_FORMAT"]
 }
