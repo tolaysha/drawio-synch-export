@@ -1,0 +1,16 @@
+{
+  "name": "drawio-synch-export",
+  "version": "1.0.0",
+  "description": "An application for automatically converting .drawio files to SVG, PNG, PDF, or JPEG.",
+  "main": "main.js",
+  "bin": {
+    "drawio-synch-export": "./main.js"
+  },
+  "scripts": {
+    "start": "node main.js"
+  },
+  "keywords": ["drawio", "svg", "conversion", "automation"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {}
+}
