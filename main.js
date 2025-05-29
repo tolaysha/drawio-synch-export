@@ -2,10 +2,17 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-// Получение аргументов из командной строки
+// Хранилище для таймеров дебаунса
+const debounceTimers = new Map();
+
+// Путь к CLI Draw.io (по умолчанию)
+const defaultDrawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
+
+// Получение аргументов командной строки
 const args = process.argv.slice(2);
-const watchDirectory = args[0] || path.join(__dirname, 'data-for-example'); // Путь к директории
-const outputFormat = args[1] || 'svg'; // Формат для конвертации
+const watchDirectory = args[0] || process.cwd(); // Директория запуска программы по умолчанию
+const outputFormat = args[1] || 'svg'; // Формат по умолчанию
+const drawioCliPath = args[2] || defaultDrawioCliPath; // Путь к Draw.io CLI по умолчанию
 
 // Список поддерживаемых форматов
 const supportedFormats = ['svg', 'png', 'pdf', 'jpeg'];
@@ -16,12 +23,6 @@ if (!supportedFormats.includes(outputFormat)) {
     process.exit(1);
 }
 
-// Хранилище для таймеров дебаунса
-const debounceTimers = new Map();
-
-// Путь к CLI Draw.io (замените на ваш путь)
-const drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
-
 // Функция для преобразования .drawio в указанный формат
 const convertDrawioToFormat = (drawioFilePath) => {
     const outputFilePath = path.join(
@@ -29,8 +30,12 @@ const convertDrawioToFormat = (drawioFilePath) => {
         `${path.basename(drawioFilePath, '.drawio')}.${outputFormat}`
     );
 
+    console.log(`Starting conversion for file: ${drawioFilePath}`);
+    console.log(`Output file will be: ${outputFilePath}`);
+    console.log(`Executing command: "${drawioCliPath}" --no-sandbox --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`);
+
     // Команда для экспорта
-    const command = `"${drawioCliPath}" --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`;
+    const command = `"${drawioCliPath}" --no-sandbox --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -41,19 +46,15 @@ const convertDrawioToFormat = (drawioFilePath) => {
             console.error(`stderr: ${stderr}`);
             return;
         }
-        console.log(`File converted to ${outputFormat}: ${outputFilePath}`);
+        console.log(`File converted successfully to ${outputFormat}: ${outputFilePath}`);
+        console.log(`stdout: ${stdout}`);
     });
 };
 
-// Функция для обработки событий
+// Функция для обработки изменений файла
 const handleFileChange = (filename) => {
-    if (filename && path.extname(filename) === '.drawio') {
-        console.log(`File changed: ${filename}`);
-
-        // Путь к измененному .drawio файлу
+    if (filename.endsWith('.drawio')) {
         const drawioFilePath = path.join(watchDirectory, filename);
-
-        // Конвертируем .drawio в указанный формат
         convertDrawioToFormat(drawioFilePath);
     }
 };
@@ -77,3 +78,4 @@ fs.watch(watchDirectory, (eventType, filename) => {
 
 console.log(`Watching for changes in ${watchDirectory}`);
 console.log(`Converting files to format: ${outputFormat}`);
+console.log(`Using Draw.io CLI at: ${drawioCliPath}`);
