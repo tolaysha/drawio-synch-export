@@ -1,51 +1,47 @@
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { exec } = require('child_process');
 
-// Директория для отслеживания (папка рядом с main.js)
-const watchDirectory = path.join(__dirname, 'data-for-example'); // Замените 'data-for-example' на имя вашей папки
+// Получение аргументов из командной строки
+const args = process.argv.slice(2);
+const watchDirectory = args[0] || path.join(__dirname, 'data-for-example'); // Путь к директории
+const outputFormat = args[1] || 'svg'; // Формат для конвертации
+
+// Список поддерживаемых форматов
+const supportedFormats = ['svg', 'png', 'pdf', 'jpeg'];
+
+// Проверка на поддерживаемый формат
+if (!supportedFormats.includes(outputFormat)) {
+    console.error(`Error: Unsupported format "${outputFormat}". Supported formats are: ${supportedFormats.join(', ')}`);
+    process.exit(1);
+}
 
 // Хранилище для таймеров дебаунса
 const debounceTimers = new Map();
 
-// Определение пути к CLI Draw.io в зависимости от операционной системы
-let drawioCliPath;
-switch (os.platform()) {
-    case 'win32': // Windows
-        drawioCliPath = 'C:\\Program Files\\draw.io\\draw.io.exe'; // Замените на реальный путь, если он отличается
-        break;
-    case 'darwin': // macOS
-        drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
-        break;
-    case 'linux': // Linux
-        drawioCliPath = '/usr/bin/drawio'; // Замените на реальный путь, если он отличается
-        break;
-    default:
-        console.error('Unsupported operating system');
-        process.exit(1);
-}
+// Путь к CLI Draw.io (замените на ваш путь)
+const drawioCliPath = '/Applications/draw.io.app/Contents/MacOS/draw.io';
 
-// Функция для преобразования .drawio в .svg
-const convertDrawioToSvg = (drawioFilePath) => {
-    const svgFilePath = path.join(
+// Функция для преобразования .drawio в указанный формат
+const convertDrawioToFormat = (drawioFilePath) => {
+    const outputFilePath = path.join(
         path.dirname(drawioFilePath),
-        `${path.basename(drawioFilePath, '.drawio')}.svg`
+        `${path.basename(drawioFilePath, '.drawio')}.${outputFormat}`
     );
 
     // Команда для экспорта
-    const command = `"${drawioCliPath}" --export --format svg --output "${svgFilePath}" "${drawioFilePath}"`;
+    const command = `"${drawioCliPath}" --export --format ${outputFormat} --output "${outputFilePath}" "${drawioFilePath}"`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Error converting .drawio to .svg: ${error.message}`);
+            console.error(`Error converting .drawio to .${outputFormat}: ${error.message}`);
             return;
         }
         if (stderr) {
             console.error(`stderr: ${stderr}`);
             return;
         }
-        console.log(`SVG file updated: ${svgFilePath}`);
+        console.log(`File converted to ${outputFormat}: ${outputFilePath}`);
     });
 };
 
@@ -57,8 +53,8 @@ const handleFileChange = (filename) => {
         // Путь к измененному .drawio файлу
         const drawioFilePath = path.join(watchDirectory, filename);
 
-        // Конвертируем .drawio в .svg
-        convertDrawioToSvg(drawioFilePath);
+        // Конвертируем .drawio в указанный формат
+        convertDrawioToFormat(drawioFilePath);
     }
 };
 
@@ -80,3 +76,4 @@ fs.watch(watchDirectory, (eventType, filename) => {
 });
 
 console.log(`Watching for changes in ${watchDirectory}`);
+console.log(`Converting files to format: ${outputFormat}`);
